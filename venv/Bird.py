@@ -1,15 +1,15 @@
 class Object():
     tracks = []
 
-    def __init__(self, id, xi,yi,wi,hi):
+    def __init__(self, id, xi,yi,wi,hi,age,timestamp):
         self.Id=id
         self.x=xi
         self.y=yi
         self.w=wi
         self.h=hi
-        self.age=0
-        self.max_age = 5
+        self.age = age
         self.tracks = []
+        self.timestamp = timestamp
         
     def getX(self):
         return  self.x
@@ -21,6 +21,11 @@ class Object():
 
     def updateCoords(self, xn, yn):
         self.tracks.append([self.x, self.y])
-        self.x =xn
-        self.y=yn
+        self.x = xn
+        self.y = yn
+
+    def toString(self):
+        text = ("Bird ID: " + (str)(self.Id) +
+                " ----- Timestamp: " + (str)(self.timestamp) +"\n")
+        return text
 
