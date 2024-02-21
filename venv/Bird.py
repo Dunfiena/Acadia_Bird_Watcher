@@ -19,6 +19,8 @@ class Object():
     def getId(self):
         return  self.Id
 
+    def setAge(self):
+        self.age = 0
     def updateCoords(self, xn, yn):
         self.tracks.append([self.x, self.y])
         self.x = xn

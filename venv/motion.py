@@ -12,16 +12,14 @@ def run(source, min, max, k_value, sigma_value, fps, height_value):
     birds = []
     birds_saved = []
     Id = 0
+    max_age = 10
+
     high = 900
     wide = 1200
     frameArea = high * wide
-    min_area = frameArea / 9000
-    max_area = frameArea / 2500
-    max_age = 15
+    min_area = frameArea / 15000
+    max_area = frameArea / 5000
 
-    # VIDEO Source = ".mp4" or 0 for webcam
-    # source = "bird vid.mp4"
-    # source ="test.mp4"
     video = cv2.VideoCapture(source)
 
     f = video.get(cv2.CAP_PROP_FPS)  # OpenCV v2.x used "CV_CAP_PROP_FPS"
@@ -44,6 +42,8 @@ def run(source, min, max, k_value, sigma_value, fps, height_value):
     next_frame = None
     delay_counter = 0
 
+    mask = cv2.createBackgroundSubtractorKNN(100, 1, False)
+
     ##################################################################################3
     # ret is return boolean   Frame is image array
     # movement flag true when detection true
@@ -57,7 +57,9 @@ def run(source, min, max, k_value, sigma_value, fps, height_value):
 
         #Adjusting this to larger numbers means a much lower senstivity
         gray = cv2.GaussianBlur(gray, (k, k), sigma)
+        gray = cv2.equalizeHist(gray)
 
+        # gray = mask.apply(gray)
         if first_frame is None: first_frame = gray
         next_frame = gray
 
@@ -65,7 +67,7 @@ def run(source, min, max, k_value, sigma_value, fps, height_value):
         frame_delta = cv2.absdiff(first_frame, next_frame)
 
         # select the difference
-        thresh = cv2.threshold(frame_delta, 5, 100, cv2.THRESH_BINARY)[1]
+        thresh = cv2.threshold(frame_delta, 6, 10, cv2.THRESH_TOZERO)[1]
 
         thresh = cv2.dilate(thresh, None, iterations=2)
         contours0, contours1 = cv2.findContours(thresh.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
@@ -104,6 +106,7 @@ def run(source, min, max, k_value, sigma_value, fps, height_value):
                                   abs(x - i.getX())*min_obj_width <= w  and abs(y - i.getY())*min_obj_width <= h):
                                 new = False
                                 i.updateCoords(cx, cy)
+                                i.setAge(0)
                             else:
                                 i.age = i.age+1
                                 if i.age == max_age:
@@ -125,9 +128,6 @@ def run(source, min, max, k_value, sigma_value, fps, height_value):
         seconds = (int)(duration % 60)
         current_Time = time/frametime
 
-        # cv2.imshow("frame", np.hstack((frame_delta, frame)))
-        frame = cv2.putText(frame, (str)(current_Time) + " / "+(str)(minutes) + " " + (str)(seconds),
-                            (50,50),0,1,(255,255,0), 2, cv2.LINE_AA)
         cv2.imshow("frame", frame)
 
         # waitkey sets the frame rate  ord('q') is the exit (press q to quit)
@@ -148,18 +148,7 @@ def run(source, min, max, k_value, sigma_value, fps, height_value):
     for bird in birds_saved:
         file.write(bird.toString())
     file.close()
-
     video.release()
-
-def sample_Ground(source):
-    sample = []
-    video = cv2.VideoCapture(source)
-    success, frame = video.read()
-    for i in frame:
-        colors = frame[i][-1]
-        sample.append(colors)
-        print(sample)
     exit(0)
-    return sample
 
-# run("bird vid.mp4", 6, 6, 21, 21, 10, 400)
+run("video_670.mp4", 2, 10, 25, 15, 10, 550)

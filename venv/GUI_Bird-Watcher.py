@@ -82,7 +82,7 @@ class MainWindow(QMainWindow):
         movement_max.setText('Maximum movement')
 
         speed = QLabel(self)
-        speed.setText('Frames per second')
+        speed.setText('Seconds per frame')
 
         self.min_move = QSpinBox()
         self.min_move.setFixedSize(100, 50)
@@ -156,7 +156,7 @@ class MainWindow(QMainWindow):
 
     def select_file(self):
         file_dialog = QFileDialog().getOpenFileName(self, 'Open file',
-                                                    './Images_Input', "Image files (*.avi *.mp4)")
+                                                    './Images_Input', "Image files (*.avi *.mp4 *.mov)")
         if file_dialog:
             image_path = file_dialog[0]
             window.set_filename(image_path)
@@ -164,6 +164,7 @@ class MainWindow(QMainWindow):
     def run(self):
         motion.run(window.get_filename(), self.min_move.value(), self.max_move.value(),
                    self.k.value(), self.sigma.value(), self.fps.value(), self.height.value())
+
     def output(self):
         output_path = QFileDialog().getExistingDirectory(self, None, "Select Folder")
         if output_path:
