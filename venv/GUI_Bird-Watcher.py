@@ -11,9 +11,8 @@ from PyQt5 import QtCore
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QIcon, QPixmap
 from PyQt5.QtWidgets import QApplication, QMainWindow, QPushButton, QLabel, QFileDialog, \
-    QGroupBox, QWidget, QGridLayout, QRadioButton, QSlider, QTabWidget, QSpinBox, QMessageBox
+    QGroupBox, QWidget, QGridLayout, QRadioButton, QSlider, QTabWidget, QSpinBox, QMessageBox, QDialog
 from imutils.video import fps
-
 
 class MainWindow(QMainWindow):
     def set_filename(self, x):
@@ -27,11 +26,12 @@ class MainWindow(QMainWindow):
 
     def get_output(self):
         return self._output
+    
     def __init__(self):
         # region setup
         super().__init__()
         self._filename = None
-        self._output = "./"
+        self._output = None
         self.title = "Acadia Bird Watcher"
         self.setWindowIcon(QIcon("Assets/project_icon_2.png"))
         self.left = 0
@@ -117,9 +117,6 @@ class MainWindow(QMainWindow):
         out_button.clicked.connect(self.output)
         out_button.setFixedSize(250, 50)
 
-        current_out = QLabel(self)
-        current_out.setText(self._output)
-
         run_button = QPushButton('Run', self)
         run_button.clicked.connect(self.run)
         run_button.setFixedSize(175,175)
@@ -147,7 +144,6 @@ class MainWindow(QMainWindow):
 
         layout.addWidget(out_label, 2, 0, 1, 3)
         layout.addWidget(out_button, 2, 6, 1, 3)
-        layout.addWidget(current_out, 2, 12, 1, 3)
 
         layout.addWidget(run_button, 0, 25, 3, 3)
 
@@ -162,16 +158,23 @@ class MainWindow(QMainWindow):
             window.set_filename(image_path)
 
     def run(self):
-        motion.run(window.get_filename(), self.min_move.value(), self.max_move.value(),
-                   self.k.value(), self.sigma.value(), self.fps.value(), self.height.value())
+        if window.get_filename() == None:
+            dlg = QMessageBox(self);
+            dlg.setWindowTitle("Alert")
+            dlg.setText("Please select file name and try again")
+            dlg.exec_()
+        else:
+            if window.get_output() == None:
+                window.set_output("./");
+            motion.run(window.get_filename(), self.min_move.value(), self.max_move.value(),
+                       self.k.value(), self.sigma.value(), self.fps.value(), self.height.value())
 
     def output(self):
         output_path = QFileDialog().getExistingDirectory(self, None, "Select Folder")
         if output_path:
-            window.set_output_dir(output_path)
+            window.set_output(output_path)
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
     window = MainWindow()
-
     sys.exit(app.exec_())
