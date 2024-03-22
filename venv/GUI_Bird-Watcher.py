@@ -21,17 +21,10 @@ class MainWindow(QMainWindow):
     def get_filename(self):
         return self._filename
 
-    def set_output(self, x):
-        self._output = x
-
-    def get_output(self):
-        return self._output
-    
     def __init__(self):
         # region setup
         super().__init__()
         self._filename = None
-        self._output = None
         self.title = "Acadia Bird Watcher"
         self.setWindowIcon(QIcon("Assets/project_icon_2.png"))
         self.left = 0
@@ -73,10 +66,10 @@ class MainWindow(QMainWindow):
         self.height = QSpinBox()
         self.height.setFixedSize(250, 50)
         self.height.setMaximum(1000)
-        self.height.setValue(600)
+        self.height.setValue(550)
 
-        movement_min = QLabel(self)
-        movement_min.setText('Minimum movement')
+        threshold = QLabel(self)
+        threshold.setText('Threshold')
 
         movement_max = QLabel(self)
         movement_max.setText('Maximum movement')
@@ -84,13 +77,13 @@ class MainWindow(QMainWindow):
         speed = QLabel(self)
         speed.setText('Seconds per frame')
 
-        self.min_move = QSpinBox()
-        self.min_move.setFixedSize(100, 50)
-        self.min_move.setValue(6)
+        self.threshold_value = QSpinBox()
+        self.threshold_value.setFixedSize(100, 50)
+        self.threshold_value.setValue(15)
 
         self.max_move = QSpinBox()
         self.max_move.setFixedSize(100, 50)
-        self.max_move.setValue(6)
+        self.max_move.setValue(7)
 
         self.fps = QSpinBox()
         self.fps.setFixedSize(100, 50)
@@ -104,18 +97,11 @@ class MainWindow(QMainWindow):
 
         self.k = QSpinBox()
         self.k.setFixedSize(100, 50)
-        self.k.setValue(21)
+        self.k.setValue(15)
 
         self.sigma = QSpinBox()
         self.sigma.setFixedSize(100, 50)
-        self.sigma.setValue(51)
-
-        out_label = QLabel(self)
-        out_label.setText('Select output Location')
-
-        out_button = QPushButton('Select output', self)
-        out_button.clicked.connect(self.output)
-        out_button.setFixedSize(250, 50)
+        self.sigma.setValue(3)
 
         run_button = QPushButton('Run', self)
         run_button.clicked.connect(self.run)
@@ -129,9 +115,9 @@ class MainWindow(QMainWindow):
         layout.addWidget(height_label, 0,6,1,3)
         layout.addWidget(self.height, 1, 6, 1, 3)
 
-        layout.addWidget(movement_min, 0,11,1,3)
+        layout.addWidget(threshold, 0,11,1,3)
         layout.addWidget(movement_max, 1,11,1,3)
-        layout.addWidget(self.min_move, 0,14,1,3)
+        layout.addWidget(self.threshold_value, 0,14,1,3)
         layout.addWidget(self.max_move, 1,14,1,3)
 
         layout.addWidget(k_label, 0,17,1,3)
@@ -141,9 +127,6 @@ class MainWindow(QMainWindow):
         layout.addWidget(self.k, 0,20,1,3)
         layout.addWidget(self.sigma, 1,20,1,3)
         layout.addWidget(self.fps, 2, 20, 1, 3)
-
-        layout.addWidget(out_label, 2, 0, 1, 3)
-        layout.addWidget(out_button, 2, 6, 1, 3)
 
         layout.addWidget(run_button, 0, 25, 3, 3)
 
@@ -158,21 +141,19 @@ class MainWindow(QMainWindow):
             window.set_filename(image_path)
 
     def run(self):
-        if window.get_filename() == None:
+        if window.get_filename() == None or window.get_filename() == "":
             dlg = QMessageBox(self);
             dlg.setWindowTitle("Alert")
             dlg.setText("Please select file name and try again")
             dlg.exec_()
         else:
-            if window.get_output() == None:
-                window.set_output("./");
-            motion.run(window.get_filename(), self.min_move.value(), self.max_move.value(),
-                       self.k.value(), self.sigma.value(), self.fps.value(), self.height.value())
+            k = self.k.value()
+            if k%2 == 0:
+                k +=1
 
-    def output(self):
-        output_path = QFileDialog().getExistingDirectory(self, None, "Select Folder")
-        if output_path:
-            window.set_output(output_path)
+            motion.run(window.get_filename(), self.threshold_value.value(), self.max_move.value(), k,
+                            self.sigma.value(), self.fps.value(), self.height.value())
+
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)

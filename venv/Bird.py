@@ -27,7 +27,6 @@ class Object():
         self.y = yn
 
     def toString(self):
-        text = ("Bird ID: " + (str)(self.Id) +
-                " ----- Timestamp: " + (str)(self.timestamp) +"\n")
+        text = ((str)(self.Id) + "\t" +(str)(self.timestamp) +"\n")
         return text
 
