@@ -2,6 +2,7 @@ import os
 import shutil
 import sys
 
+import cmd_handler
 import cv2
 import matplotlib.pyplot as plt
 import motion
@@ -11,8 +12,9 @@ from PyQt5 import QtCore
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QIcon, QPixmap
 from PyQt5.QtWidgets import QApplication, QMainWindow, QPushButton, QLabel, QFileDialog, \
-    QGroupBox, QWidget, QGridLayout, QRadioButton, QSlider, QTabWidget, QSpinBox, QMessageBox, QDialog
+    QGroupBox, QWidget, QGridLayout, QRadioButton, QSlider, QTabWidget, QSpinBox, QMessageBox, QDialog, QVBoxLayout
 from imutils.video import fps
+from cmd_handler import CmdHandler
 
 class MainWindow(QMainWindow):
     def set_filename(self, x):
@@ -24,16 +26,17 @@ class MainWindow(QMainWindow):
     def __init__(self):
         # region setup
         super().__init__()
+        self.play = None
         self._filename = None
         self.title = "Acadia Bird Watcher"
         self.setWindowIcon(QIcon("Assets/project_icon_2.png"))
-        self.left = 0
-        self.top = 0
+        self.left_bound = 0
+        self.top_bound = 0
         self.width = 1400
         self.height = 200
 
         self.setWindowTitle(self.title)
-        self.setGeometry(self.left, self.top, self.width, self.height)
+        self.setGeometry(self.left_bound, self.top_bound, self.width, self.height)
         app.setStyleSheet('QLabel{font: 12pt; color:grey}'
                           'QRadioButton{font-size: 16pt;}'
                           'QComboBox{font-size: 12pt;}'
@@ -48,7 +51,7 @@ class MainWindow(QMainWindow):
 
         # region Widgets
         sub = QWidget(self)
-        sub.setGeometry(self.left, self.top, self.width, self.height)
+        sub.setGeometry(self.left_bound, self.top_bound, self.width, self.height)
         layout = QGridLayout(self)
 
         File = QGroupBox(self)
@@ -59,14 +62,37 @@ class MainWindow(QMainWindow):
         search.clicked.connect(self.select_file)
         search.setFixedSize(250, 50)
 
-        height_border = QGroupBox(self)
-        height_label = QLabel(self)
-        height_label.setText('Select detection cutoff: ')
+        top_label = QLabel(self)
+        top_label.setText("Top cutoff")
 
-        self.height = QSpinBox()
-        self.height.setFixedSize(250, 50)
-        self.height.setMaximum(1000)
-        self.height.setValue(550)
+        bottom_label = QLabel(self)
+        bottom_label.setText("Bottom cutoff")
+
+        left_label = QLabel(self)
+        left_label.setText("Left cutoff")
+
+        right_label = QLabel(self)
+        right_label.setText("Right cutoff")
+
+        self.top = QSpinBox()
+        self.top.setFixedSize(100, 50)
+        self.top.setMaximum(1000)
+        self.top.setValue(75)
+
+        self.right = QSpinBox()
+        self.right.setFixedSize(100, 50)
+        self.right.setMaximum(1000)
+        self.right.setValue(850)
+
+        self.bottom = QSpinBox()
+        self.bottom.setFixedSize(100, 50)
+        self.bottom.setMaximum(1000)
+        self.bottom.setValue(200)
+
+        self.left = QSpinBox()
+        self.left.setFixedSize(100, 50)
+        self.left.setMaximum(1000)
+        self.left.setValue(240)
 
         threshold = QLabel(self)
         threshold.setText('Threshold')
@@ -111,9 +137,16 @@ class MainWindow(QMainWindow):
         layout.addWidget(file_sel, 0,0,1,3)
         layout.addWidget(search, 1,0,1,3)
 
-        layout.addWidget(height_border, 0, 6, 2, 3)
-        layout.addWidget(height_label, 0,6,1,3)
-        layout.addWidget(self.height, 1, 6, 1, 3)
+        layout.addWidget(top_label, 0, 4, 1, 3)
+        layout.addWidget(left_label, 1, 4, 1, 3)
+        layout.addWidget(right_label, 2, 4, 1, 3)
+        layout.addWidget(bottom_label, 3, 4, 1, 3)
+
+        layout.addWidget(self.top, 0, 7, 1, 3)
+        layout.addWidget(self.left, 1, 7, 1, 3)
+        layout.addWidget(self.right, 2, 7, 1, 3)
+        layout.addWidget(self.bottom, 3, 7, 1, 3)
+
 
         layout.addWidget(threshold, 0,11,1,3)
         layout.addWidget(movement_max, 1,11,1,3)
@@ -139,7 +172,6 @@ class MainWindow(QMainWindow):
         if file_dialog:
             image_path = file_dialog[0]
             window.set_filename(image_path)
-
     def run(self):
         if window.get_filename() == None or window.get_filename() == "":
             dlg = QMessageBox(self);
@@ -151,8 +183,9 @@ class MainWindow(QMainWindow):
             if k%2 == 0:
                 k +=1
 
-            motion.run(window.get_filename(), self.threshold_value.value(), self.max_move.value(), k,
-                            self.sigma.value(), self.fps.value(), self.height.value())
+            self.play = CmdHandler(window.get_filename(), self.threshold_value.value(), self.max_move.value(), k,
+                            self.sigma.value(), self.fps.value(), self.top.value(), self.bottom.value(), self.left.value(), self.right.value())
+            self.play.show()
 
 
 if __name__ == '__main__':

@@ -10,7 +10,7 @@ class Object():
         self.age = age
         self.tracks = []
         self.timestamp = timestamp
-        
+
     def getX(self):
         return  self.x
 
@@ -21,6 +21,14 @@ class Object():
 
     def setAge(self):
         self.age = 0
+
+    def getTracks(self):
+        return self.tracks[-0]
+
+    def getAge(self):
+        return self.age
+    def getTime(self):
+        return self.timestamp
     def updateCoords(self, xn, yn):
         self.tracks.append([self.x, self.y])
         self.x = xn
