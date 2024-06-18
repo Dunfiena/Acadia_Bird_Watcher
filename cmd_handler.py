@@ -6,7 +6,6 @@ from PyQt5.QtWidgets import QApplication, QMainWindow, QPushButton, QLabel, QFil
     QTableWidgetItem, QTableWidget, QProgressBar
 import motion
 from Bird import Object
-from tensorflow.python.distribute.coordinator.cluster_coordinator import Worker
 
 
 class CmdHandler(QWidget):

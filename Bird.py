@@ -37,4 +37,3 @@ class Object():
     def toString(self):
         text = ((str)(self.Id) + "\t" +(str)(self.timestamp) +"\n")
         return text
-

@@ -77,22 +77,22 @@ class MainWindow(QMainWindow):
         self.top = QSpinBox()
         self.top.setFixedSize(100, 50)
         self.top.setMaximum(1000)
-        self.top.setValue(75)
+        self.top.setValue(50)
 
         self.right = QSpinBox()
         self.right.setFixedSize(100, 50)
         self.right.setMaximum(1000)
-        self.right.setValue(850)
+        self.right.setValue(1000)
 
         self.bottom = QSpinBox()
         self.bottom.setFixedSize(100, 50)
         self.bottom.setMaximum(1000)
-        self.bottom.setValue(200)
+        self.bottom.setValue(600)
 
         self.left = QSpinBox()
         self.left.setFixedSize(100, 50)
         self.left.setMaximum(1000)
-        self.left.setValue(240)
+        self.left.setValue(0)
 
         threshold = QLabel(self)
         threshold.setText('Threshold')
@@ -146,7 +146,6 @@ class MainWindow(QMainWindow):
         layout.addWidget(self.left, 1, 7, 1, 3)
         layout.addWidget(self.right, 2, 7, 1, 3)
         layout.addWidget(self.bottom, 3, 7, 1, 3)
-
 
         layout.addWidget(threshold, 0,11,1,3)
         layout.addWidget(movement_max, 1,11,1,3)
