@@ -16,6 +16,7 @@ from PyQt5.QtWidgets import QApplication, QMainWindow, QPushButton, QLabel, QFil
 from imutils.video import fps
 from cmd_handler import CmdHandler
 
+
 class MainWindow(QMainWindow):
     def set_filename(self, x):
         self._filename = x
@@ -77,7 +78,7 @@ class MainWindow(QMainWindow):
         self.top = QSpinBox()
         self.top.setFixedSize(100, 50)
         self.top.setMaximum(1000)
-        self.top.setValue(50)
+        self.top.setValue(0)
 
         self.right = QSpinBox()
         self.right.setFixedSize(100, 50)
@@ -87,7 +88,7 @@ class MainWindow(QMainWindow):
         self.bottom = QSpinBox()
         self.bottom.setFixedSize(100, 50)
         self.bottom.setMaximum(1000)
-        self.bottom.setValue(600)
+        self.bottom.setValue(1000)
 
         self.left = QSpinBox()
         self.left.setFixedSize(100, 50)
@@ -109,11 +110,11 @@ class MainWindow(QMainWindow):
 
         self.max_move = QSpinBox()
         self.max_move.setFixedSize(100, 50)
-        self.max_move.setValue(7)
+        self.max_move.setValue(10)
 
         self.fps = QSpinBox()
         self.fps.setFixedSize(100, 50)
-        self.fps.setValue(10)
+        self.fps.setValue(1)
 
         k_label = QLabel(self)
         k_label.setText('K value')
@@ -131,11 +132,11 @@ class MainWindow(QMainWindow):
 
         run_button = QPushButton('Run', self)
         run_button.clicked.connect(self.run)
-        run_button.setFixedSize(175,175)
+        run_button.setFixedSize(175, 175)
 
         layout.addWidget(File, 0, 0, 2, 3)
-        layout.addWidget(file_sel, 0,0,1,3)
-        layout.addWidget(search, 1,0,1,3)
+        layout.addWidget(file_sel, 0, 0, 1, 3)
+        layout.addWidget(search, 1, 0, 1, 3)
 
         layout.addWidget(top_label, 0, 4, 1, 3)
         layout.addWidget(left_label, 1, 4, 1, 3)
@@ -147,17 +148,17 @@ class MainWindow(QMainWindow):
         layout.addWidget(self.right, 2, 7, 1, 3)
         layout.addWidget(self.bottom, 3, 7, 1, 3)
 
-        layout.addWidget(threshold, 0,11,1,3)
-        layout.addWidget(movement_max, 1,11,1,3)
-        layout.addWidget(self.threshold_value, 0,14,1,3)
-        layout.addWidget(self.max_move, 1,14,1,3)
+        layout.addWidget(threshold, 0, 11, 1, 3)
+        layout.addWidget(movement_max, 1, 11, 1, 3)
+        layout.addWidget(self.threshold_value, 0, 14, 1, 3)
+        layout.addWidget(self.max_move, 1, 14, 1, 3)
 
-        layout.addWidget(k_label, 0,17,1,3)
-        layout.addWidget(sigma_label, 1,17,1,3)
-        layout.addWidget(speed, 2,17,1,3)
+        layout.addWidget(k_label, 0, 17, 1, 3)
+        layout.addWidget(sigma_label, 1, 17, 1, 3)
+        layout.addWidget(speed, 2, 17, 1, 3)
 
-        layout.addWidget(self.k, 0,20,1,3)
-        layout.addWidget(self.sigma, 1,20,1,3)
+        layout.addWidget(self.k, 0, 20, 1, 3)
+        layout.addWidget(self.sigma, 1, 20, 1, 3)
         layout.addWidget(self.fps, 2, 20, 1, 3)
 
         layout.addWidget(run_button, 0, 25, 3, 3)
@@ -171,6 +172,8 @@ class MainWindow(QMainWindow):
         if file_dialog:
             image_path = file_dialog[0]
             window.set_filename(image_path)
+            self.checkSettings(image_path)
+
     def run(self):
         if window.get_filename() == None or window.get_filename() == "":
             dlg = QMessageBox(self);
@@ -178,13 +181,101 @@ class MainWindow(QMainWindow):
             dlg.setText("Please select file name and try again")
             dlg.exec_()
         else:
+            self.write_settings()
             k = self.k.value()
-            if k%2 == 0:
-                k +=1
+            if k % 2 == 0:
+                k += 1
 
             self.play = CmdHandler(window.get_filename(), self.threshold_value.value(), self.max_move.value(), k,
-                            self.sigma.value(), self.fps.value(), self.top.value(), self.bottom.value(), self.left.value(), self.right.value())
+                                   self.sigma.value(), self.fps.value(), self.top.value(), self.bottom.value(),
+                                   self.left.value(), self.right.value())
             self.play.show()
+
+    def checkSettings(self, image_path):
+        if os.path.isfile("database.txt"):
+            with open("database.txt", 'a+') as f:
+                f.seek(0)
+                lines = f.readlines()
+                line_num = 0
+                values = []
+                for line in lines:
+                    line_num += 1
+                    if image_path in line:
+                        for i in range(9):
+                            val = lines[line_num + i].split(":")
+                            values.append(val[-1])
+                        self.setValues(values)
+                        print("found")
+                        f.close()
+                        break
+
+                    elif line == lines[-1]:
+                        f.write("\n\n")
+                        f.write(image_path)
+                        f.write("\ntop: 1")
+                        f.write("\nleft: 1")
+                        f.write("\nright: 1")
+                        f.write("\nbottom: 1")
+                        f.write("\nthreshold: 15")
+                        f.write("\nMaximum: 10")
+                        f.write("\nK-value: 15")
+                        f.write("\nSigma: 3")
+                        f.write("\nFps: 1")
+                        self.setValues(values=[1, 1, 1, 1, 15, 10, 15, 3, 1])
+                        f.close()
+
+        else:
+            f = open("database.txt", "w")
+            f.write("Database file created\n----------------------------------------------")
+            f.write("\n\n")
+            f.write(image_path)
+            f.write("\ntop: 1")
+            f.write("\nleft: 1")
+            f.write("\nright: 1")
+            f.write("\nbottom: 1")
+            f.write("\nthreshold: 15")
+            f.write("\nMaximum: 10")
+            f.write("\nK-value: 15")
+            f.write("\nSigma: 3")
+            f.write("\nFps: 1")
+            self.setValues(values=[1, 1, 1, 1, 15, 10, 15, 3, 1])
+            f.close()
+
+    def write_settings(self):
+        f = open("database.txt", "r")
+        lines = f.readlines()
+        line_num = 0
+
+        for line in lines:
+            line_num += 1
+            if window.get_filename() in line:
+                lines[line_num] = "top: " + str(self.top.value()) + "\n"
+                lines[line_num+1] = "left: " + str(self.left.value()) + "\n"
+                lines[line_num+2] = "right: " + str(self.right.value()) + "\n"
+                lines[line_num+3] = "bottom: " + str(self.bottom.value()) + "\n"
+                lines[line_num+4] = "threshold: " + str(self.threshold_value.value()) + "\n"
+                lines[line_num+5] = "Maximum: " + str(self.max_move.value()) + "\n"
+                lines[line_num+6] = "K-value: " + str(self.k.value()) + "\n"
+                lines[line_num+7] = "Sigma: " + str(self.sigma.value()) + "\n"
+                lines[line_num+8] = "Fps: " + str(self.fps.value()) + "\n"
+                break
+
+        f.close()
+        f = open("database.txt", "w")
+        f.writelines(lines)
+        f.close()
+
+    def setValues(self, values):
+        self.top.setValue(int(values[0]))
+        self.left.setValue(int(values[1]))
+        self.right.setValue(int(values[2]))
+        self.bottom.setValue(int(values[3]))
+
+        self.threshold_value.setValue(int(values[4]))
+        self.max_move.setValue(int(values[5]))
+        self.k.setValue(int(values[6]))
+        self.sigma.setValue(int(values[7]))
+        self.fps.setValue(int(values[8]))
 
 
 if __name__ == '__main__':

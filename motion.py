@@ -23,11 +23,9 @@ class MotionThread(QThread):
     def run(self, source, threshold, max, k_value, sigma_value, fps, top, bottom, left, right):
         # Array of the birds found - ID is the id of the bird and increments
         birds = []
-        bird_check = []
         birds_saved = []
         Id = 0
         max_age = 15
-        progress = 0
 
         # Adjustments for allowed size of bird
         frameArea = 1500 * 2000
@@ -40,9 +38,9 @@ class MotionThread(QThread):
         frame_count = int(video.get(cv2.CAP_PROP_FRAME_COUNT))
         duration = frame_count / f
         time = 0
+        flag = True
 
         obj_width = max  # MOVEMENT BETWEEN FRAMES -> The higher the number = more movement
-        min_movement = 2
         frametime = fps  # Play back rate of the video
         k = k_value
         sigma = sigma_value
@@ -56,7 +54,7 @@ class MotionThread(QThread):
         ##################################################################################3
         # ret is return boolean   Frame is image array
         # movement flag true when detection true
-        while True:
+        while flag:
             ### if frames stil exist ###
             time += 1
             success, frame = video.read()
@@ -68,7 +66,7 @@ class MotionThread(QThread):
 
                 # Adjusting this to larger numbers means a much lower sensitivity
                 gray = cv2.GaussianBlur(gray, (k, k), sigma)
-                gray = cv2.equalizeHist(gray)
+                # gray = cv2.equalizeHist(gray)
 
                 if first_frame is None:
                     first_frame = gray
@@ -152,7 +150,9 @@ class MotionThread(QThread):
                 self.signal_1.emit(sig_DS)
 
                 # waitkey sets the frame rate  ord('q') is the exit (press q to quit)
-                if cv2.waitKey(frametime) & 0xFF == ord('q'):
+                if (cv2.waitKey(int((f)/fps)) & 0xFF == ord('q')
+                        or cv2.getWindowProperty('Bird Watcher', cv2.WND_PROP_VISIBLE) == 0):
+                    flag = False
                     break
             else:
                 break
