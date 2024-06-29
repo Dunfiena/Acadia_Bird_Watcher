@@ -2,15 +2,18 @@ import Bird
 
 
 def clean_slate(bird):
-    sort(bird)
+    bird_copy = bird
     birds_return = []
     for check in bird:
-        for b in bird:
-            if (b.getX() == check.getX() and b.getY() == check.getY and b.getAge() == check.getAge()):
-                birds_return.append(b)
-                bird.remove(b)
+        double_flag = False
+        for b in bird_copy:
+            if b.getX() == check.getX() and b.getY() == check.getY() and b.getAge() == check.getAge():
+                if not double_flag:
+                    birds_return.append(check)
+                    bird_copy.remove(b)
+                    double_flag = True
+                else:
+                    bird.remove(b)
+
 
     return birds_return
-
-def sort(bird):
-    return bird

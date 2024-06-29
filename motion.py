@@ -66,7 +66,7 @@ class MotionThread(QThread):
 
                 # Adjusting this to larger numbers means a much lower sensitivity
                 gray = cv2.GaussianBlur(gray, (k, k), sigma)
-                # gray = cv2.equalizeHist(gray)
+                gray = cv2.equalizeHist(gray)
 
                 if first_frame is None:
                     first_frame = gray
@@ -101,7 +101,12 @@ class MotionThread(QThread):
                         new = True
                         if y > top and y + h < bottom and x > left and x + w < right:
                             rect = cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 2)
+                            # birds = algo.clean_slate(birds)
                             for i in birds:
+                                for check in birds:
+                                    if (i.getX() == check.getX() and i.getY() == check.getY()
+                                            and i.getAge() == check.getAge() and i.getId() != check.getId()):
+                                        birds.remove(check)
                                 if abs(x - i.getX()) / obj_width <= w and abs(y - i.getY()) / obj_width <= h:
                                     # the object is close to one that was detected before
                                     new = False
@@ -131,7 +136,7 @@ class MotionThread(QThread):
                                 birds.append(bird_pojo)
                                 Id += 1
 
-                # birds_checked = algo.clean_slate(birds)
+
                 for i in birds:
                     cv2.putText(frame, str(i.getId()), (i.getX(), i.getY()), 0, 0.6, (0, 0, 124), 1, cv2.LINE_AA)
 

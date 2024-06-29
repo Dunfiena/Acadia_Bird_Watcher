@@ -80,7 +80,7 @@ class CmdHandler(QWidget):
             self.worker.run(self.source, self.threshold, self.max, self.k_value,
                        self.sigma_value, self.fps, self.top, self.bottom, self.left, self.right)
         else:
-            self.worker.continue_program(self.fps)
+            self.worker.continue_program(self.fps, self.source)
 
 
     def pause_program(self):
@@ -94,7 +94,7 @@ class CmdHandler(QWidget):
         self.progressBar.setValue(progress)
 
         j=1
-        if len(birds_saved) > 0:
+        if len(birds_saved) >= 0:
             self.savedBirdTable.setRowCount((len(birds_saved)+1))
             for i in birds_saved:
                 coord = str(i.getY()) + " , " + str(i.getX())
