@@ -101,12 +101,8 @@ class MotionThread(QThread):
                         new = True
                         if y > top and y + h < bottom and x > left and x + w < right:
                             rect = cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 2)
-                            # birds = algo.clean_slate(birds)
+                            birds = algo.clean_slate(birds)
                             for i in birds:
-                                for check in birds:
-                                    if (i.getX() == check.getX() and i.getY() == check.getY()
-                                            and i.getAge() == check.getAge() and i.getId() != check.getId()):
-                                        birds.remove(check)
                                 if abs(x - i.getX()) / obj_width <= w and abs(y - i.getY()) / obj_width <= h:
                                     # the object is close to one that was detected before
                                     new = False
