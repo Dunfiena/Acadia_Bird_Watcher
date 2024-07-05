@@ -10,14 +10,14 @@ from Bird import Object
 
 class CmdHandler(QWidget):
 
-    def __init__(self, source, threshold, max, k_value, sigma_value, fps, top, bottom, left, right):
+    def __init__(self, source, threshold, max, k_value, sigma_value, pb_Rate, top, bottom, left, right):
         super().__init__()
         self.source = source
         self.threshold = threshold
         self.max = max
         self.k_value = k_value
         self.sigma_value = sigma_value
-        self.fps = fps
+        self.PbRate = pb_Rate
         self.top = top
         self.bottom = bottom
         self.left = left
@@ -78,9 +78,9 @@ class CmdHandler(QWidget):
         if self.run_button.text() == "Run":
             self.run_button.setText("Continue")
             self.worker.run(self.source, self.threshold, self.max, self.k_value,
-                       self.sigma_value, self.fps, self.top, self.bottom, self.left, self.right)
+                       self.sigma_value, self.PbRate, self.top, self.bottom, self.left, self.right)
         else:
-            self.worker.continue_program(self.fps, self.source)
+            self.worker.continue_program(self.PbRate, self.source)
 
 
     def pause_program(self):

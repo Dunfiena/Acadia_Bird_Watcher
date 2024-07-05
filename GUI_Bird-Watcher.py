@@ -102,7 +102,7 @@ class MainWindow(QMainWindow):
         movement_max.setText('Maximum movement')
 
         speed = QLabel(self)
-        speed.setText('Seconds per frame')
+        speed.setText('Playback rate')
 
         self.threshold_value = QSpinBox()
         self.threshold_value.setFixedSize(100, 50)
@@ -112,9 +112,9 @@ class MainWindow(QMainWindow):
         self.max_move.setFixedSize(100, 50)
         self.max_move.setValue(10)
 
-        self.fps = QSpinBox()
-        self.fps.setFixedSize(100, 50)
-        self.fps.setValue(1)
+        self.PbRate = QSpinBox()
+        self.PbRate.setFixedSize(100, 50)
+        self.PbRate.setValue(1)
 
         k_label = QLabel(self)
         k_label.setText('K value')
@@ -159,7 +159,7 @@ class MainWindow(QMainWindow):
 
         layout.addWidget(self.k, 0, 20, 1, 3)
         layout.addWidget(self.sigma, 1, 20, 1, 3)
-        layout.addWidget(self.fps, 2, 20, 1, 3)
+        layout.addWidget(self.PbRate, 2, 20, 1, 3)
 
         layout.addWidget(run_button, 0, 25, 3, 3)
 
@@ -187,7 +187,7 @@ class MainWindow(QMainWindow):
                 k += 1
 
             self.play = CmdHandler(window.get_filename(), self.threshold_value.value(), self.max_move.value(), k,
-                                   self.sigma.value(), self.fps.value(), self.top.value(), self.bottom.value(),
+                                   self.sigma.value(), self.PbRate.value(), self.top.value(), self.bottom.value(),
                                    self.left.value(), self.right.value())
             self.play.show()
 
@@ -220,7 +220,7 @@ class MainWindow(QMainWindow):
                         f.write("\nMaximum: 10")
                         f.write("\nK-value: 15")
                         f.write("\nSigma: 3")
-                        f.write("\nFps: 1")
+                        f.write("\nPbRate: 1")
                         self.setValues(values=[1, 1, 1, 1, 15, 10, 15, 3, 1])
                         f.close()
 
@@ -237,7 +237,7 @@ class MainWindow(QMainWindow):
             f.write("\nMaximum: 10")
             f.write("\nK-value: 15")
             f.write("\nSigma: 3")
-            f.write("\nFps: 1")
+            f.write("\nPbRate: 1")
             self.setValues(values=[1, 1, 1, 1, 15, 10, 15, 3, 1])
             f.close()
 
@@ -257,7 +257,7 @@ class MainWindow(QMainWindow):
                 lines[line_num+5] = "Maximum: " + str(self.max_move.value()) + "\n"
                 lines[line_num+6] = "K-value: " + str(self.k.value()) + "\n"
                 lines[line_num+7] = "Sigma: " + str(self.sigma.value()) + "\n"
-                lines[line_num+8] = "Fps: " + str(self.fps.value()) + "\n"
+                lines[line_num+8] = "PbRate: " + str(self.PbRate.value()) + "\n"
                 break
 
         f.close()
@@ -275,7 +275,7 @@ class MainWindow(QMainWindow):
         self.max_move.setValue(int(values[5]))
         self.k.setValue(int(values[6]))
         self.sigma.setValue(int(values[7]))
-        self.fps.setValue(int(values[8]))
+        self.PbRate.setValue(int(values[8]))
 
 
 if __name__ == '__main__':
