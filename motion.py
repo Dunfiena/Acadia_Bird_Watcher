@@ -20,7 +20,7 @@ from signal_DataStruct import signal_DataStruct
 class MotionThread(QThread):
     signal_1 = pyqtSignal(signal_DataStruct)
 
-    def run(self, source, threshold, max, k_value, sigma_value, fps, top, bottom, left, right):
+    def run(self, source, threshold, max, k_value, sigma_value, PbRate, top, bottom, left, right):
         # Array of the birds found - ID is the id of the bird and increments
         birds = []
         birds_saved = []
@@ -41,7 +41,7 @@ class MotionThread(QThread):
         flag = True
 
         obj_width = max  # MOVEMENT BETWEEN FRAMES -> The higher the number = more movement
-        frametime = fps  # Play back rate of the video
+        frametime = PbRate  # Play back rate of the video
         k = k_value
         sigma = sigma_value
 
@@ -132,7 +132,7 @@ class MotionThread(QThread):
                                 birds.append(bird_pojo)
                                 Id += 1
 
-
+                birds = algo.clean_handler(birds, birds_saved)
                 for i in birds:
                     cv2.putText(frame, str(i.getId()), (i.getX(), i.getY()), 0, 0.6, (0, 0, 124), 1, cv2.LINE_AA)
 
@@ -142,6 +142,7 @@ class MotionThread(QThread):
                 seconds = int(duration % 60)
                 current_Time = time / f
 
+                # This is the buffer branch
                 cv2.imshow("Bird Watcher", frame)
                 # cv2.imshow("Bird Watcher", frame_delta)
 
@@ -151,7 +152,7 @@ class MotionThread(QThread):
                 self.signal_1.emit(sig_DS)
 
                 # waitkey sets the frame rate  ord('q') is the exit (press q to quit)
-                if (cv2.waitKey(int((f)/fps)) & 0xFF == ord('q')
+                if (cv2.waitKey(int((f)/PbRate)) & 0xFF == ord('q')
                         or cv2.getWindowProperty('Bird Watcher', cv2.WND_PROP_VISIBLE) == 0):
                     flag = False
                     break
@@ -168,6 +169,10 @@ class MotionThread(QThread):
                    "Total Birds Counted: " + str(len(birds + birds_saved)) + "\nBird based on timestamp: " + "\n")
         for bird in birds:
             birds_saved.append(bird)
+
+        birds_saved = algo.sort_index(birds_saved)
+        birds_saved = algo.end_run_clean_index(birds_saved)
+
         for bird in birds_saved:
             file.write(bird.toString())
         file.close()
@@ -176,5 +181,5 @@ class MotionThread(QThread):
     def pause(self):
         cv2.waitKey(-1)  # wait until any key is pressed
 
-    def continue_program(self, fps):
+    def continue_program(self, PbRate):
         cv2.destroyAllWindows()

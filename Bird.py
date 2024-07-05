@@ -12,13 +12,16 @@ class Object():
         self.timestamp = timestamp
 
     def getX(self):
-        return  self.x
+        return self.x
 
     def getY(self):
-        return  self.y
-    def getId(self):
-        return  self.Id
+        return self.y
 
+    def getId(self):
+        return self.Id
+
+    def setId(self, id):
+        self.Id = id
     def setAge(self):
         self.age = 0
 
