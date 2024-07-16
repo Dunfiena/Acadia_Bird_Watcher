@@ -177,6 +177,9 @@ class MotionThread(QThread):
             file.write(bird.toString())
         file.close()
         video.release()
+        cv2.destroyAllWindows()
+
+        ### command handler check if the next video exists and run again
 
     def pause(self):
         cv2.waitKey(-1)  # wait until any key is pressed
