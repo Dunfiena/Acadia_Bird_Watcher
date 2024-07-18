@@ -1,0 +1,36 @@
+Database file created
+----------------------------------------------
+
+C:/Users/dunfi/PycharmProjects/Acadia_Bird_Watcher/video_673.mp4
+top: 0
+left: 0
+right: 1000
+bottom: 600
+threshold: 11
+Maximum: 10
+K-value: 11
+Sigma: 3
+PbRate: 1
+
+
+C:/Users/dunfi/PycharmProjects/Acadia_Bird_Watcher/bird vid.mp4
+top: 1
+left: 1
+right: 1
+bottom: 1
+threshold: 15
+Maximum: 10
+K-value: 15
+Sigma: 3
+PbRate: 1
+
+C:/Users/dunfi/PycharmProjects/Acadia_Bird_Watcher/video_670.mp4
+top: 1
+left: 1
+right: 1
+bottom: 1
+threshold: 15
+Maximum: 10
+K-value: 15
+Sigma: 3
+PbRate: 1

@@ -1,19 +1,10 @@
 import os
-import shutil
 import sys
 
-import cmd_handler
-import cv2
-import matplotlib.pyplot as plt
-import motion
-import numpy as np
-from PIL import Image
-from PyQt5 import QtCore
-from PyQt5.QtCore import Qt
-from PyQt5.QtGui import QIcon, QPixmap
+from PyQt5.QtGui import QIcon
 from PyQt5.QtWidgets import QApplication, QMainWindow, QPushButton, QLabel, QFileDialog, \
-    QGroupBox, QWidget, QGridLayout, QRadioButton, QSlider, QTabWidget, QSpinBox, QMessageBox, QDialog, QVBoxLayout
-from imutils.video import fps
+    QGroupBox, QWidget, QGridLayout, QSpinBox, QMessageBox
+
 from cmd_handler import CmdHandler
 
 
@@ -168,8 +159,7 @@ class MainWindow(QMainWindow):
 
     def select_file(self):
         file_dialog = QFileDialog().getOpenFileNames(self, 'Open file',
-                                                    './Images_Input', "Image files (*.avi *.mp4 *.mov)")
-
+                                                     './Images_Input', "Image files (*.avi *.mp4 *.mov)")
 
         if file_dialog:
             image_path = file_dialog[0]
@@ -252,14 +242,14 @@ class MainWindow(QMainWindow):
             line_num += 1
             if window.get_filename() in line:
                 lines[line_num] = "top: " + str(self.top.value()) + "\n"
-                lines[line_num+1] = "left: " + str(self.left.value()) + "\n"
-                lines[line_num+2] = "right: " + str(self.right.value()) + "\n"
-                lines[line_num+3] = "bottom: " + str(self.bottom.value()) + "\n"
-                lines[line_num+4] = "threshold: " + str(self.threshold_value.value()) + "\n"
-                lines[line_num+5] = "Maximum: " + str(self.max_move.value()) + "\n"
-                lines[line_num+6] = "K-value: " + str(self.k.value()) + "\n"
-                lines[line_num+7] = "Sigma: " + str(self.sigma.value()) + "\n"
-                lines[line_num+8] = "PbRate: " + str(self.PbRate.value()) + "\n"
+                lines[line_num + 1] = "left: " + str(self.left.value()) + "\n"
+                lines[line_num + 2] = "right: " + str(self.right.value()) + "\n"
+                lines[line_num + 3] = "bottom: " + str(self.bottom.value()) + "\n"
+                lines[line_num + 4] = "threshold: " + str(self.threshold_value.value()) + "\n"
+                lines[line_num + 5] = "Maximum: " + str(self.max_move.value()) + "\n"
+                lines[line_num + 6] = "K-value: " + str(self.k.value()) + "\n"
+                lines[line_num + 7] = "Sigma: " + str(self.sigma.value()) + "\n"
+                lines[line_num + 8] = "PbRate: " + str(self.PbRate.value()) + "\n"
                 break
 
         f.close()
@@ -267,6 +257,7 @@ class MainWindow(QMainWindow):
         f.writelines(lines)
         f.close()
 
+    # Set values
     def setValues(self, values):
         self.top.setValue(int(values[0]))
         self.left.setValue(int(values[1]))

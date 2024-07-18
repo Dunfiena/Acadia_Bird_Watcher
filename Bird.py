@@ -1,4 +1,8 @@
+
+# Bird object
 class Object():
+
+    # Tracks is an array of x,y values that make up the birds path across the screen
     tracks = []
 
     def __init__(self, id, xi,yi,wi,hi,age,timestamp):
@@ -11,6 +15,8 @@ class Object():
         self.tracks = []
         self.timestamp = timestamp
 
+
+# Getters and Setters and other functions
     def getX(self):
         return self.x
 

@@ -179,10 +179,5 @@ class MotionThread(QThread):
         video.release()
         cv2.destroyAllWindows()
 
-        ### command handler check if the next video exists and run again
-
-    def pause(self):
+    def stop(self):
         cv2.waitKey(-1)  # wait until any key is pressed
-
-    def continue_program(self, PbRate):
-        cv2.destroyAllWindows()
