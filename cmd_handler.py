@@ -1,15 +1,11 @@
-from PyQt5 import QtCore
-from PyQt5.QtCore import Qt, pyqtSignal, QObject
-from PyQt5.QtGui import QIcon, QPixmap
-from PyQt5.QtWidgets import QApplication, QMainWindow, QPushButton, QLabel, QFileDialog, \
-    QGroupBox, QWidget, QGridLayout, QRadioButton, QSlider, QTabWidget, QSpinBox, QMessageBox, QDialog, QVBoxLayout, \
+from PyQt5.QtCore import pyqtSignal
+from PyQt5.QtGui import QIcon
+from PyQt5.QtWidgets import QPushButton, QWidget, QVBoxLayout, \
     QTableWidgetItem, QTableWidget, QProgressBar
 import motion
-from Bird import Object
 
 
 class CmdHandler(QWidget):
-
     def __init__(self, source, threshold, max, k_value, sigma_value, pb_Rate, top, bottom, left, right):
         super().__init__()
         self.source = source
@@ -35,8 +31,8 @@ class CmdHandler(QWidget):
         self.run_button = QPushButton("Run", self)
         self.run_button.clicked.connect(self.run_program)
 
-        pause_button = QPushButton("Pause", self)
-        pause_button.clicked.connect(self.pause_program)
+        stop_button = QPushButton("Stop", self)
+        stop_button.clicked.connect(self.stop_program)
 
         quit_button = QPushButton("Exit", self)
         quit_button.clicked.connect(self.quit_program)
@@ -63,7 +59,7 @@ class CmdHandler(QWidget):
 
         layout = QVBoxLayout()
         layout.addWidget(self.run_button)
-        layout.addWidget(pause_button)
+        layout.addWidget(stop_button)
         layout.addWidget(quit_button)
         layout.addWidget(self.savedBirdTable)
         layout.addWidget(self.activeBirdTables)
@@ -73,29 +69,26 @@ class CmdHandler(QWidget):
         self.worker = motion.MotionThread(self)
         self.worker.signal_1.connect(self.update)
 
-
     def run_program(self):
         if self.run_button.text() == "Run":
-            self.run_button.setText("Continue")
-            self.worker.run(self.source, self.threshold, self.max, self.k_value,
-                       self.sigma_value, self.PbRate, self.top, self.bottom, self.left, self.right)
-        else:
-            self.worker.continue_program(self.PbRate, self.source)
-
-
-    def pause_program(self):
-        self.worker.pause()
+            for x in self.source:
+                self.worker.run(x, self.threshold, self.max, self.k_value,
+                                self.sigma_value, self.PbRate, self.top, self.bottom, self.left, self.right)
+    def stop_program(self):
+        self.worker.stop()
 
     def quit_program(self):
         exit(0)
 
+    # Update function is used to get the information from the worker's PYQT signal and
+    # add the information to the GUI layout
     def update(self, sig_DS):
         progress, birds, birds_saved = sig_DS.getStructData()
         self.progressBar.setValue(progress)
 
-        j=1
+        j = 1
         if len(birds_saved) >= 0:
-            self.savedBirdTable.setRowCount((len(birds_saved)+1))
+            self.savedBirdTable.setRowCount((len(birds_saved) + 1))
             for i in birds_saved:
                 coord = str(i.getY()) + " , " + str(i.getX())
                 self.savedBirdTable.setItem(j, 0, QTableWidgetItem(str(i.getId())))
@@ -104,7 +97,7 @@ class CmdHandler(QWidget):
                 j += 1
 
             j = 1
-            self.activeBirdTables.setRowCount((len(birds)+1))
+            self.activeBirdTables.setRowCount((len(birds) + 1))
             for i in birds:
                 coord = str(i.getY()) + " , " + str(i.getX())
                 self.activeBirdTables.setItem(j, 0, QTableWidgetItem(str(i.getId())))
@@ -112,5 +105,3 @@ class CmdHandler(QWidget):
                 self.activeBirdTables.setItem(j, 2, QTableWidgetItem(str(i.getAge())))
                 self.activeBirdTables.setItem(j, 3, QTableWidgetItem(str(i.getTime())))
                 j += 1
-
-

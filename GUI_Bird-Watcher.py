@@ -1,19 +1,10 @@
 import os
-import shutil
 import sys
 
-import cmd_handler
-import cv2
-import matplotlib.pyplot as plt
-import motion
-import numpy as np
-from PIL import Image
-from PyQt5 import QtCore
-from PyQt5.QtCore import Qt
-from PyQt5.QtGui import QIcon, QPixmap
+from PyQt5.QtGui import QIcon
 from PyQt5.QtWidgets import QApplication, QMainWindow, QPushButton, QLabel, QFileDialog, \
-    QGroupBox, QWidget, QGridLayout, QRadioButton, QSlider, QTabWidget, QSpinBox, QMessageBox, QDialog, QVBoxLayout
-from imutils.video import fps
+    QGroupBox, QWidget, QGridLayout, QSpinBox, QMessageBox
+
 from cmd_handler import CmdHandler
 
 
@@ -28,7 +19,7 @@ class MainWindow(QMainWindow):
         # region setup
         super().__init__()
         self.play = None
-        self._filename = None
+        self._filename = []
         self.title = "Acadia Bird Watcher"
         self.setWindowIcon(QIcon("Assets/project_icon_2.png"))
         self.left_bound = 0
@@ -167,25 +158,26 @@ class MainWindow(QMainWindow):
         self.show()
 
     def select_file(self):
-        file_dialog = QFileDialog().getOpenFileName(self, 'Open file',
-                                                    './Images_Input', "Image files (*.avi *.mp4 *.mov)")
+        file_dialog = QFileDialog().getOpenFileNames(self, 'Open file',
+                                                     './Images_Input', "Image files (*.avi *.mp4 *.mov)")
+
         if file_dialog:
             image_path = file_dialog[0]
+            print(image_path)
             window.set_filename(image_path)
-            self.checkSettings(image_path)
+            self.checkSettings(file_dialog[0][0])
 
     def run(self):
-        if window.get_filename() == None or window.get_filename() == "":
-            dlg = QMessageBox(self);
+        if len(window.get_filename()) == 0:
+            dlg = QMessageBox(self)
             dlg.setWindowTitle("Alert")
             dlg.setText("Please select file name and try again")
             dlg.exec_()
         else:
-            self.write_settings()
+            # self.write_settings()
             k = self.k.value()
             if k % 2 == 0:
                 k += 1
-
             self.play = CmdHandler(window.get_filename(), self.threshold_value.value(), self.max_move.value(), k,
                                    self.sigma.value(), self.PbRate.value(), self.top.value(), self.bottom.value(),
                                    self.left.value(), self.right.value())
@@ -200,7 +192,7 @@ class MainWindow(QMainWindow):
                 values = []
                 for line in lines:
                     line_num += 1
-                    if image_path in line:
+                    if image_path[0] in line:
                         for i in range(9):
                             val = lines[line_num + i].split(":")
                             values.append(val[-1])
@@ -211,7 +203,7 @@ class MainWindow(QMainWindow):
 
                     elif line == lines[-1]:
                         f.write("\n\n")
-                        f.write(image_path)
+                        f.write(image_path[0])
                         f.write("\ntop: 1")
                         f.write("\nleft: 1")
                         f.write("\nright: 1")
@@ -228,7 +220,7 @@ class MainWindow(QMainWindow):
             f = open("database.txt", "w")
             f.write("Database file created\n----------------------------------------------")
             f.write("\n\n")
-            f.write(image_path)
+            f.write(image_path[0])
             f.write("\ntop: 1")
             f.write("\nleft: 1")
             f.write("\nright: 1")
@@ -250,14 +242,14 @@ class MainWindow(QMainWindow):
             line_num += 1
             if window.get_filename() in line:
                 lines[line_num] = "top: " + str(self.top.value()) + "\n"
-                lines[line_num+1] = "left: " + str(self.left.value()) + "\n"
-                lines[line_num+2] = "right: " + str(self.right.value()) + "\n"
-                lines[line_num+3] = "bottom: " + str(self.bottom.value()) + "\n"
-                lines[line_num+4] = "threshold: " + str(self.threshold_value.value()) + "\n"
-                lines[line_num+5] = "Maximum: " + str(self.max_move.value()) + "\n"
-                lines[line_num+6] = "K-value: " + str(self.k.value()) + "\n"
-                lines[line_num+7] = "Sigma: " + str(self.sigma.value()) + "\n"
-                lines[line_num+8] = "PbRate: " + str(self.PbRate.value()) + "\n"
+                lines[line_num + 1] = "left: " + str(self.left.value()) + "\n"
+                lines[line_num + 2] = "right: " + str(self.right.value()) + "\n"
+                lines[line_num + 3] = "bottom: " + str(self.bottom.value()) + "\n"
+                lines[line_num + 4] = "threshold: " + str(self.threshold_value.value()) + "\n"
+                lines[line_num + 5] = "Maximum: " + str(self.max_move.value()) + "\n"
+                lines[line_num + 6] = "K-value: " + str(self.k.value()) + "\n"
+                lines[line_num + 7] = "Sigma: " + str(self.sigma.value()) + "\n"
+                lines[line_num + 8] = "PbRate: " + str(self.PbRate.value()) + "\n"
                 break
 
         f.close()
@@ -265,6 +257,7 @@ class MainWindow(QMainWindow):
         f.writelines(lines)
         f.close()
 
+    # Set values
     def setValues(self, values):
         self.top.setValue(int(values[0]))
         self.left.setValue(int(values[1]))

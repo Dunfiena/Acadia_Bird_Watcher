@@ -177,9 +177,7 @@ class MotionThread(QThread):
             file.write(bird.toString())
         file.close()
         video.release()
-
-    def pause(self):
-        cv2.waitKey(-1)  # wait until any key is pressed
-
-    def continue_program(self, PbRate):
         cv2.destroyAllWindows()
+
+    def stop(self):
+        cv2.waitKey(-1)  # wait until any key is pressed
