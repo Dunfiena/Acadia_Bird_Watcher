@@ -1,19 +1,12 @@
 import os.path
-from PyQt5 import QtCore
-from PyQt5.QtCore import Qt, QObject, pyqtSignal, QThread
-from PyQt5.QtGui import QIcon, QPixmap
-from PyQt5.QtWidgets import QApplication, QMainWindow, QPushButton, QLabel, QFileDialog, \
-    QGroupBox, QWidget, QGridLayout, QRadioButton, QSlider, QTabWidget, QSpinBox, QMessageBox, QDialog, QVBoxLayout, \
-    QTableWidgetItem, QTableWidget, QProgressBar
-
-import algo
-import cmd_handler
-import cv2
-import Bird
-import imutils
-import numpy as np
-import time
 from datetime import datetime
+
+import cv2
+import imutils
+from PyQt5.QtCore import pyqtSignal, QThread
+
+import Bird
+import algo
 from signal_DataStruct import signal_DataStruct
 
 
@@ -21,15 +14,17 @@ class MotionThread(QThread):
     signal_1 = pyqtSignal(signal_DataStruct)
 
     def run(self, source, threshold, max, k_value, sigma_value, PbRate, top, bottom, left, right):
+
         # Array of the birds found - ID is the id of the bird and increments
         birds = []
         birds_saved = []
         Id = 0
         max_age = 15
+        empty_frames = 0
 
         # Adjustments for allowed size of bird
         frameArea = 1500 * 2000
-        min_area = frameArea / 15000
+        # min_area = frameArea / 15000
         max_area = frameArea / 50
 
         # Video loading, getting time information of video
@@ -49,9 +44,7 @@ class MotionThread(QThread):
         # differences between the two images
         first_frame = None
         next_frame = None
-        delay_counter = 0
 
-        ##################################################################################3
         # ret is return boolean   Frame is image array
         # movement flag true when detection true
         while flag:
@@ -59,9 +52,15 @@ class MotionThread(QThread):
             time += 1
             success, frame = video.read()
             if success:
-                original_frame = frame.copy()
-                # frame = imutils.resize(frame, width=1000)
+                # original_frame = frame.copy()
 
+                # Get video and get the height and width.  Height and width are used for getting the cutoff lines
+                vid = cv2.VideoCapture(source)
+                height = int(vid.get(cv2.CAP_PROP_FRAME_HEIGHT))
+                width = int(vid.get(cv2.CAP_PROP_FRAME_WIDTH))
+
+                # Resize to correct height and Convert to gray
+                frame = imutils.resize(frame, width=width, height=height)
                 gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 
                 # Adjusting this to larger numbers means a much lower sensitivity
@@ -85,52 +84,74 @@ class MotionThread(QThread):
                 thresh = cv2.dilate(thresh, None, iterations=4)
                 contours0, contours1 = cv2.findContours(thresh.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
-                # frame = imutils.resize(frame, width=1000)
+                frame = imutils.resize(frame, width=width, height=height)
                 (H, W) = frame.shape[:2]
-                cv2.line(frame, [0, top], [1000, top], (0, 0, 255), 2)
-                cv2.line(frame, [0, bottom], [1000, bottom], (0, 0, 255), 2)
-                cv2.line(frame, [right, 0], [right, 1000], (0, 0, 255), 2)
-                cv2.line(frame, [left, 0], [left, 1000], (0, 0, 255), 2)
 
-                for cnt in contours0:
-                    if max_area > cv2.contourArea(cnt):
-                        M = cv2.moments(cnt)
-                        cx = int(M['m10'] / M['m00'])
-                        cy = int(M['m01'] / M['m00'])
-                        x, y, w, h = cv2.boundingRect(cnt)
-                        new = True
-                        if y > top and y + h < bottom and x > left and x + w < right:
-                            rect = cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 2)
-                            birds = algo.clean_slate(birds)
-                            for i in birds:
-                                if abs(x - i.getX()) / obj_width <= w and abs(y - i.getY()) / obj_width <= h:
-                                    # the object is close to one that was detected before
-                                    new = False
-                                    i.updateCoords(cx, cy)
-                                    i.setAge()
-                                elif abs(x + i.getX()) * obj_width <= w and abs(y + i.getY()) * obj_width <= h:
-                                    new = False
-                                    i.updateCoords(cx, cy)
-                                    i.setAge()
-                                elif abs(x + i.getX()) * obj_width <= w and abs(y - i.getY()) / obj_width <= h:
-                                    new = False
-                                    i.updateCoords(cx, cy)
-                                    i.setAge()
-                                elif abs(x - i.getX()) / obj_width <= w and abs(y + i.getY()) * obj_width <= h:
-                                    new = False
-                                    i.updateCoords(cx, cy)
-                                    i.setAge()
-                                else:
-                                    i.age = i.age + 1
-                                    if i.age == max_age:
-                                        birds_saved.append(i)
-                                        birds.remove(i)
+                # Get the position of the cutoff lines.  This generates the pixel value of the line position from the
+                #   percentage given in the setup
+                top1 = int(height-(height-(height*(top/100))))
+                bottom1 = int(height-(height*(bottom/100)))
+                right1 = int(width-(width*(right/100)))
+                left1 = int(width-(width-(width*(left/100))))
 
-                            if new:
-                                current_Time = time / f
-                                bird_pojo = Bird.Object(Id, x, y, w, h, 0, current_Time)
-                                birds.append(bird_pojo)
-                                Id += 1
+                cv2.line(frame, [0, top1], [width, top1], (0, 255, 0), 2)
+                cv2.line(frame, [0, bottom1], [width, bottom1], (0, 0, 255), 2)
+                cv2.line(frame, [right1, 0], [right1, height], (0, 0, 255), 2)
+                cv2.line(frame, [left1, 0], [left1, height], (0, 255, 0), 2)
+
+                # if not contours0 checks if there are any objects within the screen in this loop.  If there are then we
+                #   go to the else, and run the normal code where we create objects.  If there are NO objects in the
+                #   screen, then we increment the empty frame counter by 1.  When we reach 'x' consecutive frames with
+                #   no objects, all birds are  moved to the saved birds
+
+                if not contours0:
+                    empty_frames = empty_frames+1
+                    if empty_frames == 10:
+                        empty_frames = 0
+                        for i in birds:
+                            birds_saved.append(i)
+                            birds.remove(i)
+                else:
+                    empty_frames = 0
+                    for cnt in contours0:
+                        if max_area > cv2.contourArea(cnt):
+                            M = cv2.moments(cnt)
+                            cx = int(M['m10'] / M['m00'])
+                            cy = int(M['m01'] / M['m00'])
+                            x, y, w, h = cv2.boundingRect(cnt)
+                            new = True
+                            if y > top1 and y + h < bottom1 and x > left1 and x + w < right1:
+                                rect = cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 2)
+                                birds = algo.clean_slate(birds)
+                                for i in birds:
+                                    if abs(x - i.getX()) / obj_width <= w and abs(y - i.getY()) / obj_width <= h:
+                                        # the object is close to one that was detected before
+                                        new = False
+                                        i.updateCoords(cx, cy)
+                                        i.setAge()
+                                    elif abs(x + i.getX()) * obj_width <= w and abs(y + i.getY()) * obj_width <= h:
+                                        new = False
+                                        i.updateCoords(cx, cy)
+                                        i.setAge()
+                                    elif abs(x + i.getX()) * obj_width <= w and abs(y - i.getY()) / obj_width <= h:
+                                        new = False
+                                        i.updateCoords(cx, cy)
+                                        i.setAge()
+                                    elif abs(x - i.getX()) / obj_width <= w and abs(y + i.getY()) * obj_width <= h:
+                                        new = False
+                                        i.updateCoords(cx, cy)
+                                        i.setAge()
+                                    else:
+                                        i.age = i.age + 1
+                                        if i.age == max_age:
+                                            birds_saved.append(i)
+                                            birds.remove(i)
+
+                                if new:
+                                    current_Time = time / f
+                                    bird_pojo = Bird.Object(Id, x, y, w, h, 0, current_Time)
+                                    birds.append(bird_pojo)
+                                    Id += 1
 
                 birds = algo.clean_handler(birds, birds_saved)
                 for i in birds:

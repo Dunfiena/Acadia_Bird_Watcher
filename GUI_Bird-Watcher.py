@@ -68,22 +68,22 @@ class MainWindow(QMainWindow):
 
         self.top = QSpinBox()
         self.top.setFixedSize(100, 50)
-        self.top.setMaximum(1000)
+        self.top.setMaximum(100)
         self.top.setValue(0)
 
         self.right = QSpinBox()
         self.right.setFixedSize(100, 50)
-        self.right.setMaximum(1000)
-        self.right.setValue(1000)
+        self.right.setMaximum(100)
+        self.right.setValue(0)
 
         self.bottom = QSpinBox()
         self.bottom.setFixedSize(100, 50)
-        self.bottom.setMaximum(1000)
-        self.bottom.setValue(1000)
+        self.bottom.setMaximum(100)
+        self.bottom.setValue(0)
 
         self.left = QSpinBox()
         self.left.setFixedSize(100, 50)
-        self.left.setMaximum(1000)
+        self.left.setMaximum(100)
         self.left.setValue(0)
 
         threshold = QLabel(self)
@@ -184,6 +184,7 @@ class MainWindow(QMainWindow):
             self.play.show()
 
     def checkSettings(self, image_path):
+        print(image_path)
         if os.path.isfile("database.txt"):
             with open("database.txt", 'a+') as f:
                 f.seek(0)
@@ -192,7 +193,7 @@ class MainWindow(QMainWindow):
                 values = []
                 for line in lines:
                     line_num += 1
-                    if image_path[0] in line:
+                    if image_path in line:
                         for i in range(9):
                             val = lines[line_num + i].split(":")
                             values.append(val[-1])
@@ -203,34 +204,34 @@ class MainWindow(QMainWindow):
 
                     elif line == lines[-1]:
                         f.write("\n\n")
-                        f.write(image_path[0])
-                        f.write("\ntop: 1")
-                        f.write("\nleft: 1")
-                        f.write("\nright: 1")
-                        f.write("\nbottom: 1")
+                        f.write(image_path)
+                        f.write("\ntop: 0")
+                        f.write("\nleft: 0")
+                        f.write("\nright: 0")
+                        f.write("\nbottom: 0")
                         f.write("\nthreshold: 15")
                         f.write("\nMaximum: 10")
                         f.write("\nK-value: 15")
                         f.write("\nSigma: 3")
                         f.write("\nPbRate: 1")
-                        self.setValues(values=[1, 1, 1, 1, 15, 10, 15, 3, 1])
+                        self.setValues(values=[0, 0, 0, 0, 15, 10, 15, 3, 1])
                         f.close()
 
         else:
             f = open("database.txt", "w")
             f.write("Database file created\n----------------------------------------------")
             f.write("\n\n")
-            f.write(image_path[0])
-            f.write("\ntop: 1")
-            f.write("\nleft: 1")
-            f.write("\nright: 1")
-            f.write("\nbottom: 1")
+            f.write(image_path)
+            f.write("\ntop: 0")
+            f.write("\nleft: 0")
+            f.write("\nright: 0")
+            f.write("\nbottom: 0")
             f.write("\nthreshold: 15")
             f.write("\nMaximum: 10")
             f.write("\nK-value: 15")
             f.write("\nSigma: 3")
             f.write("\nPbRate: 1")
-            self.setValues(values=[1, 1, 1, 1, 15, 10, 15, 3, 1])
+            self.setValues(values=[0, 0, 0, 0, 15, 10, 15, 3, 1])
             f.close()
 
     def write_settings(self):
