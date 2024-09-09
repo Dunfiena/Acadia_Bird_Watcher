@@ -7,7 +7,7 @@ from PyQt5.QtWidgets import QApplication, QMainWindow, QPushButton, QLabel, QFil
 
 from cmd_handler import CmdHandler
 
-
+# pyinstaller GUI_Bird-Watcher.py --onefile
 class MainWindow(QMainWindow):
     def set_filename(self, x):
         self._filename = x
