@@ -106,7 +106,7 @@ class MotionThread(QThread):
 
                 if not contours0:
                     empty_frames = empty_frames+1
-                    if empty_frames == 10:
+                    if empty_frames == 5:
                         empty_frames = 0
                         for i in birds:
                             birds_saved.append(i)

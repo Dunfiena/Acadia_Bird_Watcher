@@ -44,5 +44,6 @@ class Object():
         self.y = yn
 
     def toString(self):
-        text = ((str)(self.Id) + "\t" +(str)(self.timestamp) +"\n")
+        id = self.Id+1
+        text = ((str)(id) + "\t" +(str)(self.timestamp) +"\n")
         return text
