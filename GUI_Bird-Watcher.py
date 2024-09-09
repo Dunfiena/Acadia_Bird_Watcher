@@ -161,7 +161,7 @@ class MainWindow(QMainWindow):
         file_dialog = QFileDialog().getOpenFileNames(self, 'Open file',
                                                      './Images_Input', "Image files (*.avi *.mp4 *.mov)")
 
-        if file_dialog:
+        if file_dialog[0]:
             image_path = file_dialog[0]
             print(image_path)
             window.set_filename(image_path)
